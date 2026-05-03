@@ -29,7 +29,7 @@ urlpatterns = [
     path('students/add/', views.student_add, name='student_add'),
     path('students/edit/<int:student_id>/', views.student_edit, name='student_edit'),
     path('students/delete/<int:student_id>/', views.student_delete, name='student_delete'),
-    path('students/id/<int:student_id>/', views.student_id_card, name='student_id_card'),
+    
 
     # ---- Issue / Return URLs ----
     path('issue/', views.issue_book, name='issue_book'),                         # Issue a book

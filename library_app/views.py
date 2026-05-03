@@ -200,4 +200,6 @@ def return_book(request, record_id):
 
 def issued_list(request):
     records = IssueRecord.objects.select_related('student', 'book')
-    return render(request, 'library_app/issued_list.html', {'records': records})
+    return render(request, 'library_app/issued_list.html', {'records': records}) 
+def student_id_card(request, student_id):
+    return render(request, 'library_app/id_card.html')    
