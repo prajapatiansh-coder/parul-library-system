@@ -16,7 +16,7 @@ urlpatterns = [
     # ---- Authentication URLs ----
     path('', views.login_view, name='login'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
-    path('logout/', views.logout_view, name='logout'),
+    
 
     # ---- Book CRUD URLs ----
     path('books/', views.book_list, name='book_list'),
