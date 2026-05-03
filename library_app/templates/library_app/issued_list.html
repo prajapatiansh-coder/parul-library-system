@@ -1,0 +1,111 @@
+{% extends "library_app/base.html" %}
+{% load tz %}
+
+{% block title %}Issued Records - Parul University Library{% endblock %}
+
+{% block content %}
+<div class="glass-card">
+    <div class="page-header">
+        <h2><i class="bi bi-list-check"></i> Issued Records</h2>
+        <a href="{% url 'issue_book' %}" class="btn-primary-custom">
+            <i class="bi bi-box-arrow-up-right"></i> Issue New Book
+        </a>
+    </div>
+
+    {% if records %}
+    <div class="table-responsive">
+        <table class="table-glass">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Book</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Return Date</th>
+                    <th>Fine</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in records %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <strong>{{ record.student.name }}</strong>
+                        <br>
+                        <small style="color: rgba(255,255,255,0.4);">{{ record.student.enrollment_no }}</small>
+                    </td>
+                    <td><strong>{{ record.book.title }}</strong></td>
+                    <td>{{ record.issue_date|date:"d M Y" }}</td>
+                    <td>{{ record.due_date|date:"d M Y" }}</td>
+                    <td>
+                        {% if record.return_date %}
+                            {{ record.return_date|date:"d M Y" }}
+                        {% else %}
+                            <span style="color: rgba(255,255,255,0.2);">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if record.fine_amount > 0 %}
+                            <span style="color: #ff6b81; font-weight: 700;">₹{{ record.fine_amount }}</span>
+                        {% elif record.estimated_fine > 0 %}
+                            <span style="color: #ff9f43; font-weight: 600;">₹{{ record.estimated_fine }}*</span>
+                            <br><small style="color: rgba(255,255,255,0.3);">Est.</small>
+                        {% else %}
+                            <span style="color: #2ed573;">₹0</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if record.is_returned %}
+                            <!-- Returned -->
+                            <span style="background: rgba(46,213,115,0.15); color: #7bed9f; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(46,213,115,0.25);">
+                                <i class="bi bi-check-circle"></i> Returned
+                            </span>
+                        {% elif record.is_overdue %}
+                            <!-- Overdue -->
+                            <span style="background: rgba(255,71,87,0.15); color: #ff6b81; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(255,71,87,0.25); animation: pulse 2s infinite;">
+                                <i class="bi bi-exclamation-triangle"></i> Overdue ({{ record.overdue_days }} days)
+                            </span>
+                        {% else %}
+                            <!-- Active / On Time -->
+                            <span style="background: rgba(30,144,255,0.15); color: #70a1ff; padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; border: 1px solid rgba(30,144,255,0.25);">
+                                <i class="bi bi-clock"></i> Active
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not record.is_returned %}
+                        <a href="{% url 'return_book' record.id %}" class="btn-edit"
+                           onclick="return confirm('Confirm return of &quot;{{ record.book.title }}&quot; from {{ record.student.name }}?')">
+                            <i class="bi bi-arrow-return-left"></i> Return
+                        </a>
+                        {% else %}
+                        <span style="color: rgba(255,255,255,0.3); font-size: 13px;">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-list-check"></i>
+        <h4>No records found</h4>
+        <p>No books have been issued yet.</p>
+        <a href="{% url 'issue_book' %}" class="btn-primary-custom mt-3">
+            <i class="bi bi-box-arrow-up-right"></i> Issue First Book
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+</style>
+{% endblock %}

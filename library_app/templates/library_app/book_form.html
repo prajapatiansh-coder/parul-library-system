@@ -1,0 +1,67 @@
+{% extends "library_app/base.html" %}
+
+{% block title %}{{ form_title }} - Parul University Library{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 650px; margin: 0 auto;">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h2>
+            <i class="bi bi-{% if book %}pencil-square{% else %}plus-circle{% endif %}"></i>
+            {{ form_title }}
+        </h2>
+    </div>
+
+    <!-- Book Form -->
+    <form method="POST" class="form-glass">
+        {% csrf_token %}
+
+        <!-- Book Title -->
+        <div class="mb-3">
+            <label for="title" class="form-label">Book Title</label>
+            <input type="text" class="form-control" id="title" name="title"
+                   placeholder="Enter book title"
+                   value="{% if book %}{{ book.title }}{% endif %}"
+                   required>
+        </div>
+
+        <!-- Author -->
+        <div class="mb-3">
+            <label for="author" class="form-label">Author</label>
+            <input type="text" class="form-control" id="author" name="author"
+                   placeholder="Enter author name"
+                   value="{% if book %}{{ book.author }}{% endif %}"
+                   required>
+        </div>
+
+        <!-- ISBN -->
+        <div class="mb-3">
+            <label for="isbn" class="form-label">ISBN</label>
+            <input type="text" class="form-control" id="isbn" name="isbn"
+                   placeholder="Enter 13-digit ISBN number"
+                   value="{% if book %}{{ book.isbn }}{% endif %}"
+                   required>
+        </div>
+
+        <!-- Quantity -->
+        <div class="mb-4">
+            <label for="quantity" class="form-label">Quantity</label>
+            <input type="number" class="form-control" id="quantity" name="quantity"
+                   placeholder="Number of copies"
+                   value="{% if book %}{{ book.quantity }}{% else %}1{% endif %}"
+                   min="0" required>
+        </div>
+
+        <!-- Form Buttons -->
+        <div class="d-flex gap-3">
+            <button type="submit" class="btn-primary-custom">
+                <i class="bi bi-check-lg"></i>
+                {% if book %}Update Book{% else %}Add Book{% endif %}
+            </button>
+            <a href="{% url 'book_list' %}" class="btn-secondary-custom">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

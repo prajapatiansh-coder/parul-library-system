@@ -1,0 +1,62 @@
+{% extends "library_app/base.html" %}
+
+{% block title %}Issue Book - Parul University Library{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 650px; margin: 0 auto;">
+    <div class="page-header">
+        <h2><i class="bi bi-box-arrow-up-right"></i> Issue Book</h2>
+    </div>
+
+    <form method="POST" class="form-glass">
+        {% csrf_token %}
+
+        <!-- Select Student -->
+        <div class="mb-3">
+            <label for="student" class="form-label">Select Student</label>
+            <select class="form-control" id="student" name="student" required>
+                <option value="">-- Choose a Student --</option>
+                {% for student in students %}
+                <option value="{{ student.id }}">{{ student.name }} ({{ student.enrollment_no }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Select Book -->
+        <div class="mb-3">
+            <label for="book" class="form-label">Select Book (available copies only)</label>
+            <select class="form-control" id="book" name="book" required>
+                <option value="">-- Choose a Book --</option>
+                {% for book in books %}
+                <option value="{{ book.id }}">{{ book.title }} by {{ book.author }} ({{ book.quantity }} available)</option>
+                {% endfor %}
+            </select>
+            {% if not books %}
+            <small style="color: #ff6b81; display: block; margin-top: 8px;">
+                <i class="bi bi-exclamation-triangle"></i> No books available to issue. All books are currently out of stock.
+            </small>
+            {% endif %}
+        </div>
+
+        <!-- Due Date -->
+        <div class="mb-4">
+            <label for="due_date" class="form-label">Due Date</label>
+            <input type="date" class="form-control" id="due_date" name="due_date"
+                   value="{{ default_due_date }}" required>
+            <small style="color: rgba(255,255,255,0.4); display: block; margin-top: 6px;">
+                Default: 14 days from today. You can change this.
+            </small>
+        </div>
+
+        <!-- Form Buttons -->
+        <div class="d-flex gap-3">
+            <button type="submit" class="btn-primary-custom" {% if not books %}disabled{% endif %}>
+                <i class="bi bi-check-lg"></i> Issue Book
+            </button>
+            <a href="{% url 'issued_list' %}" class="btn-secondary-custom">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

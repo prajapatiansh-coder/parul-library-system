@@ -1,0 +1,302 @@
+<!--
+    Login Page - Parul University Library Management System
+    
+    This template displays a clean login form with:
+    - University branding
+    - Username and Password fields
+    - Error/success messages
+    - CSRF protection ({% csrf_token %})
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Parul University Library</title>
+    <style>
+        /* ============================================
+           CSS Styles for Login Page
+           ============================================ */
+
+        /* Import Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        /* Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* Deep blue gradient background */
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated floating orbs in the background */
+        body::before,
+        body::after {
+            content: '';
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        body::before {
+            width: 400px;
+            height: 400px;
+            background: #6c5ce7;
+            top: -100px;
+            left: -100px;
+        }
+
+        body::after {
+            width: 350px;
+            height: 350px;
+            background: #00cec9;
+            bottom: -100px;
+            right: -100px;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -30px) scale(1.1); }
+        }
+
+        /* Login Container - Glassmorphism Card */
+        .login-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 1;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* University Logo / Icon */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 32px;
+            box-shadow: 0 8px 24px rgba(108, 92, 231, 0.4);
+        }
+
+        .logo-section h1 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .logo-section p {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        /* Flash Messages (success, error, info) */
+        .messages {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .messages li {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .messages .error {
+            background: rgba(255, 71, 87, 0.15);
+            color: #ff6b81;
+            border: 1px solid rgba(255, 71, 87, 0.2);
+        }
+
+        .messages .success {
+            background: rgba(46, 213, 115, 0.15);
+            color: #7bed9f;
+            border: 1px solid rgba(46, 213, 115, 0.2);
+        }
+
+        .messages .info {
+            background: rgba(30, 144, 255, 0.15);
+            color: #70a1ff;
+            border: 1px solid rgba(30, 144, 255, 0.2);
+        }
+
+        /* Form Styling */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        .form-group input:focus {
+            border-color: #6c5ce7;
+            background: rgba(108, 92, 231, 0.08);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.15);
+        }
+
+        /* Login Button */
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            border: none;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        .footer-text {
+            text-align: center;
+            margin-top: 28px;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <!-- University Branding -->
+        <div class="logo-section">
+            <div class="logo-icon">📚</div>
+            <h1>Parul University</h1>
+            <p>Library Management System</p>
+        </div>
+
+        <!-- Display flash messages (errors, success, info) -->
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <!-- Login Form -->
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}  <!-- CSRF protection - required by Django -->
+
+            <!-- Username Field -->
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Enter your username"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <!-- Password Field -->
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                >
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="login-btn">Sign In</button>
+        </form>
+
+        <p class="footer-text">© 2026 Parul University. All rights reserved.</p>
+    </div>
+
+</body>
+</html>

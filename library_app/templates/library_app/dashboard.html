@@ -1,0 +1,164 @@
+{% extends "library_app/base.html" %}
+
+{% block title %}Dashboard - Parul University Library{% endblock %}
+
+{% block content %}
+<!-- Welcome Message -->
+<div class="d-flex justify-content-between align-items-end mb-4">
+    <div>
+        <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 8px;">
+            Welcome, <span style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">{{ user.username }}!</span> 👋
+        </h1>
+        <p style="color: rgba(255,255,255,0.5); font-size: 16px; margin-bottom: 0;">Here's your library dashboard overview for today.</p>
+    </div>
+    <a href="{% url 'generate_pdf_report' %}" class="btn-primary-custom" style="background: #2ed573; border-color: #2ed573;">
+        <i class="bi bi-file-earmark-pdf"></i> Download Full Report
+    </a>
+</div>
+
+<!-- Stats Cards -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-bottom: 40px;">
+    <div class="glass-card" style="padding: 24px;">
+        <div style="width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px; background: rgba(108,92,231,0.2);">📖</div>
+        <h3 style="font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ total_books }}</h3>
+        <p style="color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Total Books</p>
+    </div>
+
+    <div class="glass-card" style="padding: 24px;">
+        <div style="width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px; background: rgba(0,206,201,0.2);">👥</div>
+        <h3 style="font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ total_students }}</h3>
+        <p style="color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Registered Students</p>
+    </div>
+
+    <div class="glass-card" style="padding: 24px;">
+        <div style="width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px; background: rgba(253,203,110,0.2);">📤</div>
+        <h3 style="font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ books_issued }}</h3>
+        <p style="color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Books Issued</p>
+    </div>
+
+    <div class="glass-card" style="padding: 24px;">
+        <div style="width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px; background: rgba(255,107,129,0.2);">⚠️</div>
+        <h3 style="font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ overdue_count }}</h3>
+        <p style="color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Overdue Returns</p>
+    </div>
+
+    <div class="glass-card" style="padding: 24px;">
+        <div style="width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 14px; background: rgba(46,213,115,0.2);">💰</div>
+        <h3 style="font-size: 28px; font-weight: 800; margin-bottom: 4px;">₹{{ total_fines_collected }}</h3>
+        <p style="color: rgba(255,255,255,0.5); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Total Fines Collected</p>
+    </div>
+</div>
+
+<!-- REMINDERS SECTION -->
+<div class="row mt-4">
+    <!-- Due Soon Section -->
+    <div class="col-md-6 mb-4">
+        <div class="glass-card h-100">
+            <div class="page-header mb-3">
+                <h4 style="font-size: 18px; margin-bottom: 0;"><i class="bi bi-clock-history"></i> Due Soon (Next 2 Days)</h4>
+                <span class="badge rounded-pill bg-info">{{ due_soon_list.count }}</span>
+            </div>
+            
+            {% if due_soon_list %}
+            <div class="table-responsive">
+                <table class="table table-dark table-hover table-borderless" style="background: transparent; font-size: 13px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.4);">
+                            <th>Student</th>
+                            <th>Book</th>
+                            <th>Due Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in due_soon_list %}
+                        <tr>
+                            <td>{{ record.student.name }}</td>
+                            <td>{{ record.book.title }}</td>
+                            <td><span class="badge bg-warning text-dark">{{ record.due_date|date:"d M" }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center py-4" style="color: rgba(255,255,255,0.3); font-size: 14px;">No books due soon.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Overdue Section -->
+    <div class="col-md-6 mb-4">
+        <div class="glass-card h-100">
+            <div class="page-header mb-3">
+                <h4 style="font-size: 18px; margin-bottom: 0; color: #ff6b81;"><i class="bi bi-exclamation-octagon"></i> Overdue Books</h4>
+                <span class="badge rounded-pill bg-danger">{{ overdue_list.count }}</span>
+            </div>
+            
+            {% if overdue_list %}
+            <div class="table-responsive">
+                <table class="table table-dark table-hover table-borderless" style="background: transparent; font-size: 13px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: rgba(255,255,255,0.4);">
+                            <th>Student</th>
+                            <th>Book</th>
+                            <th>Overdue</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in overdue_list %}
+                        <tr style="color: #ff6b81;">
+                            <td>{{ record.student.name }}</td>
+                            <td>{{ record.book.title }}</td>
+                            <td><span class="badge bg-danger">{{ record.overdue_days }} days</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-center py-4" style="color: rgba(255,255,255,0.3); font-size: 14px;">Great! No overdue books.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<h2 style="font-size: 20px; font-weight: 700; margin-bottom: 20px;">Quick Actions</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+    <a href="{% url 'issue_book' %}" class="glass-card" style="padding: 24px; text-align: center; text-decoration: none; color: #fff;">
+        <div style="font-size: 28px; margin-bottom: 12px;">📋</div>
+        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">Issue Book</h4>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.4);">Issue to a student</p>
+    </a>
+
+    <a href="{% url 'issued_list' %}" class="glass-card" style="padding: 24px; text-align: center; text-decoration: none; color: #fff;">
+        <div style="font-size: 28px; margin-bottom: 12px;">📊</div>
+        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">Issued Records</h4>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.4);">View all records</p>
+    </a>
+
+    <a href="{% url 'book_add' %}" class="glass-card" style="padding: 24px; text-align: center; text-decoration: none; color: #fff;">
+        <div style="font-size: 28px; margin-bottom: 12px;">➕</div>
+        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">Add New Book</h4>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.4);">Register a new book</p>
+    </a>
+
+    <a href="{% url 'book_list' %}" class="glass-card" style="padding: 24px; text-align: center; text-decoration: none; color: #fff;">
+        <div style="font-size: 28px; margin-bottom: 12px;">📚</div>
+        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">Manage Books</h4>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.4);">View all books</p>
+    </a>
+
+    <a href="{% url 'student_add' %}" class="glass-card" style="padding: 24px; text-align: center; text-decoration: none; color: #fff;">
+        <div style="font-size: 28px; margin-bottom: 12px;">👤</div>
+        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">Add Student</h4>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.4);">Register new student</p>
+    </a>
+
+    <a href="{% url 'student_list' %}" class="glass-card" style="padding: 24px; text-align: center; text-decoration: none; color: #fff;">
+        <div style="font-size: 28px; margin-bottom: 12px;">👥</div>
+        <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">Manage Students</h4>
+        <p style="font-size: 12px; color: rgba(255,255,255,0.4);">View all students</p>
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "library_app/base.html" %}
+
+{% block title %}{{ form_title }} - Parul University Library{% endblock %}
+
+{% block content %}
+<div class="glass-card" style="max-width: 650px; margin: 0 auto;">
+    <div class="page-header">
+        <h2>
+            <i class="bi bi-{% if student %}pencil-square{% else %}person-plus{% endif %}"></i>
+            {{ form_title }}
+        </h2>
+    </div>
+
+    <form method="POST" class="form-glass" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Student Name -->
+        <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" id="name" name="name"
+                   placeholder="Enter student's full name"
+                   value="{% if student %}{{ student.name }}{% elif form_data %}{{ form_data.name }}{% endif %}"
+                   required>
+        </div>
+
+        <!-- Enrollment Number -->
+        <div class="mb-3">
+            <label for="enrollment_no" class="form-label">Enrollment No.</label>
+            <input type="text" class="form-control" id="enrollment_no" name="enrollment_no"
+                   placeholder="Enter unique enrollment number"
+                   value="{% if student %}{{ student.enrollment_no }}{% elif form_data %}{{ form_data.enrollment_no }}{% endif %}"
+                   required>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+            <label for="email" class="form-label">Email Address</label>
+            <input type="email" class="form-control" id="email" name="email"
+                   placeholder="Enter email address"
+                   value="{% if student %}{{ student.email }}{% elif form_data %}{{ form_data.email }}{% endif %}"
+                   required>
+        </div>
+
+        <!-- Student Photo -->
+        <div class="mb-4">
+            <label for="photo" class="form-label">Student Photo</label>
+            <input type="file" class="form-control" id="photo" name="photo" accept="image/*">
+            {% if student.photo %}
+                <small class="text-white-50 d-block mt-2">Current photo: {{ student.photo.name }}</small>
+            {% endif %}
+        </div>
+
+        <!-- Form Buttons -->
+        <div class="d-flex gap-3">
+            <button type="submit" class="btn-primary-custom">
+                <i class="bi bi-check-lg"></i>
+                {% if student %}Update Student{% else %}Add Student{% endif %}
+            </button>
+            <a href="{% url 'student_list' %}" class="btn-secondary-custom">
+                <i class="bi bi-arrow-left"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
