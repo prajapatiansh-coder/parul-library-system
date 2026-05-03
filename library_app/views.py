@@ -42,6 +42,8 @@ def login_view(request):
     if not User.objects.filter(username="admin").exists():
         User.objects.create_superuser("admin", "admin@gmail.com", "Admin@123")
 
+   print("USERS:", User.objects.all())
+
     # If user already logged in
     if request.user.is_authenticated:
         return redirect('dashboard')
