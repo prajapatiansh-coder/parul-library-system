@@ -36,6 +36,31 @@ from .models import Book, Student, IssueRecord
 # ============================================================
 
 def login_view(request):
+    from django.contrib.auth.models import User
+
+    # AUTO CREATE ADMIN USER
+    if not User.objects.filter(username="admin").exists():
+        User.objects.create_superuser("admin", "admin@gmail.com", "Admin@123")
+
+    # If user already logged in
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+
+    # Login logic
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is not None:
+            login(request, user)
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Invalid username or password')
+
+    return render(request, 'library_app/login.html')
+
     """
     Handles the login page.
 
